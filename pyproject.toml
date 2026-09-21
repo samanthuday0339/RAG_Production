@@ -1,0 +1,52 @@
+[project]
+name = "llmops"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "samanthuday0339", email = "bsamanthuday@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "docx2txt==0.9",
+    "faiss-cpu>=1.15.1",
+    "fastapi==0.115.6",
+    "ipykernel==6.30.0",
+    "ipywidgets>=8.1.9",
+    "jinja2==3.1.4",
+    "kernel>=0.110.0",
+    "langchain==1.4.2",
+    "langchain-classic==1.0.8",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.6.3",
+    "langchain-google-genai>=4.4.0",
+    "langchain-groq>=1.1.3",
+    "langchain-huggingface>=1.2.2",
+    "langchain-openai>=1.6.2",
+    "langchain-text-splitters>=1.1.2",
+    "langsmith==0.13.0",
+    "openai>=3.16.2",
+    "openevals>=0.2.0",
+    "pandas>=2.3.3",
+    "pypdf>=6.19.0",
+    "python-dotenv==1.1.1",
+    "python-multipart==0.0.20",
+    "sentence-transformers>=6.1.0",
+    "structlog>=26.1.0",
+    "uvicorn==0.32.1",
+]
+
+[project.scripts]
+llmops = "llmops:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

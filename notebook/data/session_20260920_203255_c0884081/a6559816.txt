@@ -1,0 +1,75 @@
+Understanding the Modern AI Engineering Stack
+
+Introduction
+
+AI engineering has emerged as a distinct discipline within software development, sitting at the intersection of machine learning, backend systems, and product design. Unlike traditional machine learning research, which focuses on model architecture and training, AI engineering is primarily concerned with building reliable, scalable systems around pretrained models. This document covers the core concepts, tools, and practices that define the field today.
+
+What Is an AI Engineer?
+
+An AI engineer is a practitioner who builds applications and systems powered by large language models and other foundation models. Their work typically involves prompt design, retrieval systems, evaluation pipelines, and production deployment. Many AI engineers come from traditional software engineering backgrounds rather than research, since the barrier to building useful applications with existing models is much lower than training models from scratch.
+
+Core Responsibilities
+
+AI engineers typically handle several recurring tasks. First, they select and integrate foundation models, choosing between providers based on cost, latency, and capability. Second, they design prompts and conversation flows that reliably produce useful outputs. Third, they build retrieval systems that ground model responses in accurate, up-to-date information. Fourth, they implement evaluation frameworks to measure quality and catch regressions. Finally, they monitor production systems for drift, failures, and cost overruns.
+
+Retrieval-Augmented Generation
+
+Retrieval-augmented generation, commonly abbreviated as RAG, is one of the most widely adopted patterns in AI engineering. The core idea is simple: instead of relying solely on a model's internal knowledge, the system retrieves relevant documents or passages at query time and includes them in the prompt. This approach reduces hallucination, allows models to answer questions about private or recent data, and makes it possible to update information without retraining.
+
+A typical RAG pipeline consists of several stages. Documents are first loaded from a source such as PDFs, web pages, or databases. These documents are then split into smaller chunks, since most embedding models and language models have limited context windows. Each chunk is converted into a vector embedding using an embedding model. These embeddings are stored in a vector database or index, which supports fast similarity search. At query time, the user's question is also embedded, and the system retrieves the most similar chunks. Finally, the retrieved chunks are combined with the original question in a prompt sent to a language model, which generates a grounded answer.
+
+Chunking Strategies
+
+Chunking is a deceptively important step in RAG systems. Chunks that are too large dilute relevance and consume excessive context window space. Chunks that are too small lose important surrounding context. Common strategies include fixed-size chunking with overlap, sentence-based chunking, and semantic chunking that groups related sentences together. Overlap between chunks helps preserve context that might otherwise be split across boundaries. Many practitioners start with a chunk size between 500 and 1500 characters and an overlap of 10 to 20 percent, then tune based on evaluation results.
+
+Embedding Models
+
+Embedding models convert text into dense numerical vectors that capture semantic meaning. Texts with similar meaning produce vectors that are close together in the embedding space, which allows similarity search to find relevant content even when exact keywords don't match. Popular embedding models range from small, fast, locally-runnable models to large, API-based models with higher accuracy. Choosing an embedding model involves tradeoffs between cost, latency, dimensionality, and retrieval quality. Local models are attractive for prototyping and privacy-sensitive applications, while hosted models often provide better accuracy at the cost of API dependency.
+
+Vector Databases
+
+Vector databases are specialized storage systems optimized for similarity search over high-dimensional vectors. Unlike traditional databases that use exact matching or range queries, vector databases use approximate nearest neighbor algorithms to quickly find the most similar vectors among millions or billions of entries. Popular approaches include hierarchical navigable small world graphs and inverted file indexes. Many teams start with lightweight, embeddable options for prototyping before moving to managed, distributed vector databases for production scale.
+
+Retrieval Quality and Search Strategies
+
+Basic similarity search is not always sufficient for high-quality retrieval. Maximal marginal relevance, often abbreviated as MMR, is a technique that balances relevance with diversity, preventing the retrieved set from containing many near-duplicate chunks. Hybrid search combines dense vector search with traditional keyword-based search, which can improve results for queries containing specific terms, names, or codes that embeddings may not capture well. Reranking is another common technique, where an initial set of candidates is retrieved quickly and then reordered using a more expensive but more accurate model.
+
+Prompt Engineering
+
+Prompt engineering refers to the practice of crafting inputs to language models to reliably elicit desired outputs. Effective prompts often include clear instructions, relevant context, examples of desired output format, and explicit constraints. Techniques such as chain-of-thought prompting, where the model is asked to reason step by step, can improve performance on complex tasks. Few-shot prompting, which includes examples directly in the prompt, helps models understand the expected format and style without additional training.
+
+Evaluation of AI Systems
+
+Evaluating AI systems is fundamentally harder than evaluating traditional software, since outputs are often open-ended and there may be multiple valid answers. Common evaluation approaches include human review, where domain experts rate outputs against a rubric; automated metrics, which compare outputs to reference answers using techniques like semantic similarity; and LLM-as-judge approaches, where a separate model evaluates the quality of generated outputs. For RAG systems specifically, evaluation often focuses on both retrieval quality, measuring whether relevant documents were found, and generation quality, measuring whether the final answer is accurate and well-grounded in the retrieved context.
+
+Common RAG Failure Modes
+
+RAG systems can fail in several characteristic ways. Retrieval failure occurs when the system fails to find relevant documents, often due to poor chunking, mismatched embedding models, or queries phrased very differently from the source material. Context dilution occurs when too many irrelevant chunks are retrieved alongside relevant ones, causing the model to lose focus. Hallucination can still occur even with retrieval, if the model ignores the provided context or extrapolates beyond what the sources actually say. Outdated information is a failure mode where the underlying document store has not been refreshed, leading to answers based on stale data.
+
+Agentic Systems
+
+An emerging area within AI engineering involves agentic systems, where a language model is given the ability to take actions, call external tools, and make multi-step decisions toward a goal. Unlike simple question-answering systems, agents often operate in a loop: observing the current state, deciding on an action, executing that action, and observing the result before deciding on the next step. Agentic systems introduce additional engineering challenges around safety, permissions, and error recovery, since a model with the ability to take real-world actions can cause more harm from mistakes than one that only generates text.
+
+Tool Use and Function Calling
+
+Modern language models increasingly support structured function calling, where the model can request that a specific function be executed with specific arguments. This capability underlies most agentic systems, allowing models to search the web, query databases, send messages, or trigger other automated processes. Well-designed tool interfaces include clear descriptions of what each tool does, well-typed input schemas, and informative error messages, since the model relies entirely on this metadata to decide when and how to use each tool.
+
+Monitoring and Observability
+
+Once an AI system is in production, ongoing monitoring becomes essential. Teams typically track metrics such as latency, cost per request, error rates, and user satisfaction signals. Logging the full context sent to a model, along with its output, enables debugging and supports offline evaluation as new test cases are discovered. Drift detection, which monitors whether the distribution of inputs or the quality of outputs is changing over time, helps teams catch degradation before it significantly impacts users.
+
+Cost and Latency Considerations
+
+Language model APIs charge based on the number of input and output tokens processed, which makes cost a first-class engineering concern. Strategies for managing cost include caching repeated queries, using smaller models for simpler tasks, truncating unnecessary context, and batching requests where possible. Latency similarly matters for user experience, particularly in interactive applications; streaming responses, where tokens are displayed as they are generated rather than waiting for the full response, is a common technique for improving perceived responsiveness.
+
+Fine-Tuning Versus Retrieval
+
+Teams often face a choice between fine-tuning a model on custom data and using retrieval to provide relevant context at query time. Fine-tuning can be effective for teaching a model a specific style, format, or narrow skill, but it is generally less effective for injecting large amounts of factual knowledge, since that knowledge must be re-learned any time the underlying facts change. Retrieval, by contrast, allows knowledge to be updated simply by changing the underlying document store, without retraining. Many production systems combine both approaches, using fine-tuning for behavior and formatting while relying on retrieval for factual grounding.
+
+The Future of AI Engineering
+
+As foundation models continue to improve, the discipline of AI engineering is likely to keep evolving. Longer context windows may reduce the need for aggressive chunking in some use cases, while more capable and cheaper models may shift more work from retrieval toward direct reasoning. At the same time, the fundamentals of reliable evaluation, careful system design, and thoughtful integration into existing products are likely to remain central to the field for the foreseeable future, regardless of how the underlying models themselves evolve.
+
+Conclusion
+
+AI engineering combines practical software development skills with an understanding of how modern language models behave. Building effective RAG systems, evaluation pipelines, and agentic applications requires careful attention to details like chunking strategy, retrieval quality, and monitoring, alongside a solid grasp of prompt design and system architecture. As the field matures, these practices are becoming more standardized, but experimentation and careful evaluation remain essential for building systems that work reliably in the real world.
